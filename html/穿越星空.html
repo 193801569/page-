@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>粒子效果</title>
+    <style>
+        #ctx1{
+            background-color: #000000;
+            position:absolute;
+            margin: 0 auto;
+            padding: 0 auto;
+        }
+    </style>
+</head>
+<body>
+<canvas width="1350" height="768" id="ctx1">
+
+</canvas>
+</body>
+<script>
+    star= {
+        //x,y是中心点坐标
+        x:null,
+        y:null,
+        num:20,
+        color_:["#2aabd2","#4cae4c","#ffff00","#843534","#ab003c","#3E2E44","#0000FF",
+            "#000000","#2e6da4","#ffaabb","#f0ad4e","#ff0000"],
+        color:[],
+        obj:[],
+        speedxy:[],
+        size:[],
+
+        speed:1/2,
+        init: function () {
+            this.x=main.width/2;
+            this.y=main.height/2;
+
+        },
+        create:function(){
+            for(var i=0;i<this.num;i++){
+                this.obj.push([Math.floor(Math.random()*main.width*2/3)+main.width/6,
+                    Math.floor(Math.random()*main.width/2)+main.height/4]);
+                temp=this.obj.length-1;
+                a=(this.obj[temp][0]-this.x)/Math.abs((this.obj[temp][0]+this.obj[temp][1]-this.x-this.y));
+                b=(this.obj[temp][1]-this.y)/Math.abs((this.obj[temp][0]+this.obj[temp][1]-this.x-this.y));
+                this.speedxy.push([a,b]);
+                this.size.push(0.6);
+                this.color.push(this.color_[i%12]);
+            }
+
+
+        },
+        draw: function () {
+            for(var i=0;i<this.obj.length;i++){
+                ctx.fillStyle = this.color[i];
+                ctx.beginPath();
+                ctx.arc(this.obj[i][0],this.obj[i][1],this.size[i],0,Math.PI*2,true);
+                ctx.fill();
+
+            }
+
+        },
+        move:function(){
+            for(var i=0;i<this.obj.length;i++){
+                // this.speedxy[i][0]+=this.speed*1.5*(Math.abs(this.speedxy[i][0])/this.speedxy[i][0]);
+                this.speedxy[i][0]*=1.1;
+                this.speedxy[i][1]*=1.1;
+                // this.speedxy[i][1]+=this.speed*1.5*(Math.abs(this.speedxy[i][1])/this.speedxy[i][1]);
+                this.obj[i][0]+=this.speedxy[i][0]*this.speed;
+                this.obj[i][1]+=this.speedxy[i][1]*this.speed;
+                // if(main.count===3) this.size[i]+=1;
+                this.size[i]+=0.1;
+            }
+        },
+        judge:function(){
+            for(var i=0;i<this.obj.length;i++){
+                if(this.obj[i][0]<0||this.obj[i][0]>main.width||this.obj[i][1]<0||this.obj[i][1]>main.height){
+                    this.obj.splice(i,1);//删除指定位置的1个元素
+                    this.speedxy.splice(i,1);//删除指定位置的1个元素
+                    this.size.splice(i,1);
+                    this.color.splice(i,1);
+                }
+            }
+        },
+    };
+
+    main={
+        // width:1200,
+        width:1350,
+        height:750,
+        // height:600,
+        time:40,
+        count:0,
+        run:function(){
+            star.init();
+            // ctx.beginPath();
+            // ctx.fillStyle = "#ffffff";
+            // ctx.arc(this.width/2,this.height/2,30,0,Math.PI*2,true);
+            // ctx.fill();
+            setInterval(function(){
+                this.count%=4;
+                ctx.clearRect(0,0,3000,2800);
+                star.create();
+                star.draw();
+                star.move();
+                star.judge();
+                // alert(star.obj.length);
+                this.count++;
+            },this.time)
+
+        },
+    };
+    function init(){
+        ctx=document.getElementsByTagName("canvas")[0].getContext("2d");
+
+    };
+
+    init();
+    main.run();
+</script>
+</html>

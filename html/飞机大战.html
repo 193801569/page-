@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>飞机大战</title>
+    <style>
+        .container {
+            background-color: #2aabd2;
+            margin: 0 auto;
+            height: 768px;
+            width: 1366px;
+            /*text-align: center;*/
+        }
+        canvas {
+            position: absolute;
+            background-color: rgb(201,202,207);
+            /*background-color: #4cae4c;*/
+            margin: 0 auto;
+            top:10px;
+            left:35px;
+            /*padding: 60px ;*/
+            /*left: 300px;*/
+            /*text-align: center;*/
+        }
+
+    </style>
+</head>
+<body>
+<div class="container"  >
+    <canvas height="600" width="1200" >
+    </canvas>
+    <div class="button" >
+    </div>
+</div>
+
+</body>
+
+<script>
+    //7:35
+    fighter={
+        size:60,
+        x:null,
+        y:null,
+        speedx:5,
+        speedy:5,
+        img:null,
+        init:function(){
+            this.x=Math.floor(Math.random()*game.width*2/3+game.width/6);
+            // this.y=Math.floor(Math.random()*game.height*2/3+game.height/6);
+            this.y=game.height-70;
+            this.img=new Image();
+            this.img.src="../static/cars/fighter.jfif";
+        },
+        draw:function(){
+            ctx.drawImage(this.img,this.x,this.y,this.size,this.size);
+        },
+        move:function(){
+            this.x+=this.speedx;
+            this.y+=this.speedy;
+        },
+        judge:function(){
+            if(enemy.enemys[0][1]+enemy.height>game.height-10){
+                if(confirm("最终得分"+info.score+",是否再来一局")){location.reload();}
+            }
+        },
+
+    };
+    info={
+        score:0,
+        level:1,
+        draw:function(){
+            ctx.fillStyle = '#0f1';
+            ctx.strokeStyle = '#2aabd2'; //  来用画字体边框;
+            ctx.font = (game.height/20 ) + 'px Impact';
+            ctx.textAlign = 'center';
+            ctx.fillText("score:" + this.score, game.width - 90, 60);
+            ctx.fillText("level:" + this.level, game.width - 200, 60);
+        },
+    };
+    bullet= {
+        width: 5,
+        height: 15,
+        speed: 10,
+        speedup: 4,
+        color: "#ff0000",
+        bullets: [],
+        num: 3,
+        init: function () {
+
+        },
+        create: function () {
+            if (this.bullets.length >= this.num) {
+                return;
+            }
+            //将子弹左上角的坐标保存
+            this.bullets.push([fighter.x + fighter.size / 2 - this.width / 2, fighter.y - this.height]);
+        },
+        draw: function () {
+            // ctx.beginPath();
+            ctx.fillStyle = this.color;
+            for (var i = 0; i < this.bullets.length; i++) {
+                ctx.fillRect(this.bullets[i][0], this.bullets[i][1], this.width, this.height);
+            }
+
+        },
+        move: function () {
+            for (var i = 0; i < this.bullets.length; i++) {
+                this.bullets[i][1] -= this.speed;
+            }
+        },
+        judgedeal: function (j) {
+            this.bullets.shift();
+            enemy.enemys.splice(j, 1);
+            info.score++;
+            if (info.score % 10 === 0) {
+                info.level++;
+                enemy.num++;
+                enemy.speedx -= 0.25;
+                enemy.speedy -= 0.15;
+                this.speed += this.speedup;
+                this.num += 3;
+            }
+        },
+        judge: function () {
+            //不加这句会出现异常
+            if (this.bullets.length === 0 || enemy.enemys.length === 0) {
+                return;
+            }
+            if (this.bullets[0][1] <= 0) {
+                this.bullets.shift();
+            }
+            for (var i = 0; i < this.bullets.length; i++) {
+                for (var j = 0; j < enemy.enemys.length; j++) {
+                    if (this.bullets[i][0] > enemy.enemys[j][0]) {
+                        if ((this.bullets[i][0] - enemy.enemys[j][0] <= enemy.width) &&
+                            (this.bullets[i][1] - enemy.enemys[j][1] <= enemy.height)) {
+                            this.bullets.shift();
+                            //这里是为了减少代码冗余，所以将子弹打中后得代码封装成了一个函数
+                            this.judgedeal(j);
+                        }
+                    } else {
+                        if ((enemy.enemys[j][0] - this.bullets[i][0] <= this.width) &&
+                            (this.bullets[i][1] - enemy.enemys[j][1] <= enemy.height)) {
+                            this.judgedeal(j);
+                        }
+                    }
+                }
+            }
+        }
+
+    };
+    enemy={
+        width:66,  //165
+        height:54,   //135
+        speedx:5,
+        speedy:3,
+        speed:[],
+        img:null,
+        enemys:[],
+        num:1,
+
+        init:function(){
+            this.img=new Image();
+            this.img.src="../static/cars/en.png";
+
+        },
+        create:function(){
+            if(this.enemys.length>=this.num){return;}
+            this.enemys.push([Math.floor(Math.random()*game.width*2/3+game.width/6),0]);
+            this.speed.push([Math.random()*this.speedx-this.speedx/2,this.speedy]);
+        },
+        draw:function(){
+            for(var i=0;i<this.enemys.length;i++){
+                ctx.drawImage(this.img,this.enemys[i][0],this.enemys[i][1],this.width,this.height);
+            }
+        },
+        move:function() {
+
+            for (var i = 0; i<this.enemys.length; i++) {
+                // this.speedx = Math.floor(Math.random() * this.speed-this.speed/2);
+                // this.speedy = Math.floor(Math.random() * this.speed);
+                if(this.enemys[i][0]<0||this.enemys[i][0]>game.width-game.left){
+                    this.speed[i][0]=-this.speed[i][0];
+                }
+                this.enemys[i][0] += this.speed[i][0];
+                this.enemys[i][1] += this.speed[i][1];
+            }
+            this.count++;
+        },
+        judge:function(){
+            if(this.enemys.length===0){return;}
+            if(this.enemys[0][1]>=game.height){
+                this.enemys.shift();
+                this.speed.shift();
+            }
+        },
+    };
+    game={
+        fps:30,
+        height:600,
+        width:1200,
+        left:35,
+        top:10,
+        init:function(){
+
+        },
+        run:function(){
+            this.init();
+            fighter.init();
+            bullet.init();
+            enemy.init();
+            setInterval(function(){
+                ctx.clearRect(0,0,1200,600);
+                enemy.create();
+                info.draw();
+                fighter.draw();
+                bullet.draw();
+                enemy.draw();
+                bullet.move();
+                enemy.move();
+                fighter.judge();
+                bullet.judge();
+                enemy.judge();
+            },game.fps)
+        },
+    };
+    //
+    function init(){
+        ctx=document.getElementsByTagName("canvas")[0].getContext("2d");
+
+    };
+
+    init();
+    game.run();
+
+
+    document.onmousemove=function(event){
+        fighter.x=event.clientX;
+        fighter.y=event.clientY;
+        // if(event.clientX>game.width-game.left) {character.x=game.width-game.left;alert();}
+        if(event.clientX>game.width-game.left-15) {fighter.x=game.width-game.left-15;}
+        else if(event.clientX<0) character.x=0;
+        if(event.clientY>game.height-game.top-10) character.y=game.height-game.top-10;
+
+    };
+    document.onclick=function(){
+        bullet.create();
+    };
+    document.onkeydown=function(event){
+        event=event||window.event;
+        if (event.keyCode === 32) {
+            if(confirm("已为您暂停游戏,按下空格或者点击确定以继续,取消返回主界面(目前主界面还没做好)")){}
+        }
+        event.returnValue = false;// 取消按键网页移动
+    };
+</script>
+</html>

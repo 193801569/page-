@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>断网小恐龙</title>
+    <style>
+        .container {
+            background-color: #2aabd2;
+            margin: 0 auto;
+            height: 768px;
+            width: 1366px;
+            /*text-align: center;*/
+        }
+        canvas {
+            position: absolute;
+            background-color: rgb(247,247,247);
+            margin: 0 auto;
+            top:10px;
+            left:35px;
+        }
+
+    </style>
+    <script src="../static/jQuery/jQuery-3.4.1.min.js"></script>
+    <script src="../static/jQuery/jQuery-3.4.1.js"></script>
+
+
+</head>
+<body>
+<div class="container"  >
+    <canvas height="400" width="1200" >
+    </canvas>
+    <div class="button" >
+    </div>
+</div>
+</body>
+<script>
+    game={
+        time:20,
+        height:400,
+        width:1200,
+        left:35,
+        top:10,
+        init:function(){
+
+        },
+        run:function(){
+            this.init();
+            long.init();
+            background.init();
+            background.create();
+            setInterval(function(){
+                ctx.clearRect(0,0,1200,600);
+                info.draw();
+                long.draw();
+                background.draw();
+                background.move();
+                long.jump();
+                long.judge();
+                background.judge();
+            },game.time)
+        },
+    };
+    long={
+        img:null,
+        img1:null,
+        img2:null,
+        x:100,
+        y:null,
+        height:null,
+        width:null,
+        height1:50,
+        height2:25,
+        width1:50,
+        width2:50,
+        speedx:6,
+        speedy:10,
+        jumpHeight:null,
+        speedUp:1,
+        direction:0,
+        temp:null,
+        keystat:0,//0表示未按下键盘
+        init:function(){
+            this.img1=new Image();
+            this.img2=new Image();
+            this.img1.src="../static/game/long.jfif";
+            this.img2.src="../static/game/small.png";
+            long.img=long.img1;
+            long.height=long.height1;
+            long.width=long.width1;
+            this.y=game.height-this.height-background.horizen;
+            // this.y=game.height-this.height;
+            this.jumpHeight=background.height*3.2;
+
+        },
+        draw:function(){
+            ctx.drawImage(this.img,this.x,this.y,this.width,this.height);
+        },
+        jump:function(){
+            if(this.y<game.height-this.jumpHeight){
+                this.direction=-1;
+            }else if(this.y>game.height-this.height-background.horizen){
+                this.direction=0;
+                this.y=game.height-this.height-background.horizen;
+                //使龙不能多阶跳
+                long.keystat=0;
+            }
+
+            switch (this.direction) {
+                case 1:this.temp*=0.96;this.y-=this.temp;break;
+                case 0:this.temp=this.speedy;break;
+                case -1:this.temp/=0.96;this.y+=this.temp;break
+            }
+        },
+        judge:function(){
+            //-10 为减小判断相撞时的间距
+            if(background.trees.length<=0){return;}
+            temp=(background.trees.length>1)?1:0;
+            //被树撞死
+            if(((Math.abs(this.x-background.trees[0][0])<this.width-15)&&(
+                (background.trees[0][1]-this.y<this.height-game.top-10)))){
+                if(confirm("最终得分"+info.score+",是否再来一局")){location.reload();}
+            }
+        },
+    };
+
+
+    background={
+        height:64,
+        width:32,
+        horizen:18,
+        tree:null,
+        x:null,
+        y:null,
+        count:null,
+        trees:[],
+        size:[],
+        distance:60,
+        init:function(){
+            this.tree=new Image();
+            this.tree.src="../static/game/tree.jfif";
+        },
+        create:function(){
+            this.trees.push([game.width-this.width,game.height-this.height]);
+            this.size.push([Math.ceil(Math.random()*this.width*7/5+this.width*4/5),
+                Math.ceil(Math.random()*this.height*7/5+this.height*4/5)]);
+            this.count=Math.ceil(Math.random()*this.distance*2+this.distance);
+        },
+        draw:function(){
+            ctx.beginPath();
+            ctx.strokeStyle="#505050";
+            ctx.moveTo(0,game.height-this.horizen);
+            ctx.lineTo(game.width,game.height-this.horizen);
+            ctx.stroke();
+            if(this.trees.length<=0) {return;}
+            for(var i=0;i<this.trees.length;i++){
+                ctx.drawImage(this.tree,this.trees[i][0],this.trees[i][1],this.size[i][0],this.size[i][1])
+            }
+
+        },
+        move:function(){
+            for(var i=0;i<this.trees.length;i++){
+                this.trees[i][0]-=long.speedx;
+            }
+        },
+        judge:function(){
+            if(this.count<=0){this.create();}
+            this.count--;
+            if(this.trees.length<=0){return;}
+            if(this.trees[0][0]+this.size[0][0]<=0){
+                    this.trees.shift();
+                    this.size.shift();
+                    info.score++;
+                    if(info.score%10===0){
+                        info.level++;
+                        long.speedx+=long.speedUp;
+                        this.distance-=5;
+                    }
+
+            }
+        },
+    };
+    info={
+        score:0,
+        level:1,
+        draw:function(){
+            ctx.fillStyle = '#0f1';
+            ctx.strokeStyle = '#2aabd2'; //  来用画字体边框;
+            ctx.font = (game.height/20 ) + 'px Impact';
+            ctx.textAlign = 'center';
+            ctx.fillText("score:" + this.score, game.width - 90, 60);
+            ctx.fillText("level:" + this.level, game.width - 200, 60);
+        },
+    };
+
+    //
+    function init() {
+        ctx = document.getElementsByTagName("canvas")[0].getContext("2d");
+
+    }
+
+    document.onkeydown=function(event){
+        event=event||window.event;
+        if (event.keyCode === 32) {
+            if(confirm("已为您暂停游戏,按下空格或者点击确定以继续,取消返回主界面(目前主界面还没做好)")){}
+        }else if(event.keyCode===38||event.keyCode===87) {
+            long.img=long.img1;
+            long.height=long.height1;
+            long.width=long.width1;
+            if (long.keystat === 0) {
+                long.keystat = 1;
+                long.direction = 1;
+            }
+        }else if(event.keyCode===40||event.keyCode===83){
+            long.img=long.img2;
+            long.height=long.height2;
+            long.width=long.width2;
+            long.y+=long.height1-long.height2+100;
+            ctx.drawImage(long.img2,this.x,this.y,this.width2,this.height2);
+        }
+        {#// event.returnValue = false;// 取消按键网页移动#}
+    };
+    init();
+    game.run();
+</script>
+</html>

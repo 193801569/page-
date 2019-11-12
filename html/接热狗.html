@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>王思聪接热狗</title>
+    <link rel="stylesheet" type="text/css" href="../bootstrap/bootstrap/css/bootstrap.min.css">
+    <style>
+        .container {
+            background-color: #2aabd2;
+            margin: 0 auto;
+            height: 768px;
+            width: 1366px;
+            /*text-align: center;*/
+        }
+        #bnt1{
+            left:400px;
+            top: 20px;
+            position: relative;
+            /*height: 100px;*/
+            /*width:100%;*/
+        }
+        .button{
+            left:1250px;
+            top:20px;
+            position: absolute;
+        }
+        canvas {
+            position: absolute;
+            background-color: #ffffff;
+            /*background-color: #4cae4c;*/
+            margin: 0 auto;
+            top:10px;
+            left:35px;
+            /*padding: 60px ;*/
+            /*left: 300px;*/
+            /*text-align: center;*/
+        }
+
+    </style>
+    <script src="../jQuery/jQuery-3.4.1.min.js"></script>
+
+</head>
+<body>
+<div class="container"  >
+    <canvas height="600" width="1200" >
+    </canvas>
+    <div class="button" >
+        <p><button id="start" type="button" class="btn btn-primary">start</button></p>
+        <p><button id="pause"  type="button" class="btn btn-warning" width="30">pause</button></p>
+    </div>
+</div>
+</body>
+<script>
+    character={
+        // head:null,
+        size:50,
+        x:null,
+        y:null,
+        tempSpeed:null,
+        speed:15,
+        head:null,
+        //用来记录snake的状态，1表示运动,-1表示被空格暂停
+        direction:null,//1表示向右移动，-1表示左.
+        init:function(){
+            //使x，y产生的范围分别为(200,800)
+            this.x=Math.random()*600+200;
+            this.y=game.height-this.size;
+            this.head=new Image();
+            this.head.src ="../static/character/head1.jpg";
+            this.direction={37:-1,39:1};
+        },
+        move:function(){
+            this.x+=this.speed;
+        },
+        stop:function(){
+            if(confirm("已经为您暂停游戏，点击确认或者空格继续游戏")){}
+        },
+
+        draw:function(){
+            // ctx.translate(this.x,game.height-this.size);
+            //移动canvas原点与旋转
+            // ctx.rotate(-Math.PI / 2);
+            ctx.drawImage(this.head,this.x,this.y,this.size,this.size);
+        },
+        judge:function(event){
+
+        },
+
+    };
+    info={
+        score:0,
+        level:1,
+        draw:function(){
+            ctx.fillStyle = '#0f1';
+            ctx.strokeStyle = '#2aabd2'; //  来用画字体边框;
+            ctx.font = (game.height/20 ) + 'px Impact';
+            ctx.textAlign = 'center';
+            ctx.fillText("score:" + this.score, game.width - 90, 60);
+            ctx.fillText("level:" + this.level, game.width - 200, 60);
+        },
+    };
+    food={
+        size:40,
+        x:null,
+        y:0,
+        body:null,
+        speed:10,
+        init:function(){
+            //使x，y产生的范围分别为(200,800),和(250,450)
+            this.x=Math.random()*600+200;
+            this.body=new Image();
+            this.body.src="../static/character/hotdog1.png";
+            this.y=0;
+        },
+        draw:function(){
+            ctx.fillStyle="#444444";
+            ctx.drawImage(this.body,this.x,this.y,this.size,this.size);
+        },
+        move:function(){
+            this.y+=this.speed;
+        },
+        isEat:function(){
+
+            if((Math.abs(this.x-character.x)<this.size/2)&&((character.y-this.y)<(this.size+character.size)/2)){
+                this.init();
+                info.score++;
+                if(info.score%5===0){info.level++;food.speed++;}
+
+            }else if(this.y>=game.height-this.size/2){
+                if(confirm("你玩游戏像菜虚坤，点击确定或者按下空格再来一局")){
+                    location.reload();
+                }else{}
+            }
+
+        },
+    };
+    game={
+        fps:40,
+        height:600,
+        width:1200,
+        left:35,
+        init:function(){
+
+        },
+        run:function(){
+            this.init();
+            character.init();
+            food.init();
+            // alert("x:"+snake.x+"y:"+snake.y);
+            setInterval(function(){
+                ctx.clearRect(0,0,1200,600);
+                info.draw();
+                food.draw();
+                character.draw();
+                // character.move();
+                food.move();
+                food.isEat();
+                // character.judge();
+            },game.fps)
+        },
+    };
+    //
+    function init(){
+        ctx=document.getElementsByTagName("canvas")[0].getContext("2d");
+        var array=[];
+    };
+
+    init();
+    game.run();
+
+
+
+
+    start.onclick=function(){
+
+    };
+
+    document.onkeydown=function(event){
+        event=event||window.event;
+        if (event.keyCode === 32) {
+            character.stop();
+        }
+        event.returnValue = false;// 取消按键网页移动
+    };
+    document.onmousemove=function(event){
+        event=event||event.window;
+        if(event.clientX>game.width-game.left-10) character.x=game.width-game.left-10;
+        else if(event.clientX<0) character.x=0;
+        else character.x=event.clientX;
+
+    }
+</script>
+</html>

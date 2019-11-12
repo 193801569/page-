@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>别踩白块移动</title>
+    <style>
+        #box1{
+            background-color: #2aabd2;
+            margin: 0 auto;
+            height: 768px;
+            width: 1366px;
+        }
+        #ctx1{
+            background-color: #FFFFFF;
+            left:500px;
+            top:20px;
+            position:absolute;
+        }
+        #ctx2{
+            /*background-color: #4cae4c;*/
+            background-color: #3cccc3;
+            left:920px;
+            top:20px;
+            position:absolute;
+        }
+    </style>
+
+</head>
+<body>
+<div id="box1" >
+<!--    <audio autoplay="autoplay" controls="controls"loop="loop" preload="auto"-->
+<!--           src="../static/musics/卡农.mp3">-->
+<!--        你的浏览器版本太低，不支持audio标签-->
+<!--    </audio>-->
+
+
+
+
+<!--    <ul class="music">-->
+<!--        <li>钢琴块之歌</li>-->
+<!--        <li>卡农</li>-->
+<!--        <li>青石巷</li>-->
+<!--        <li>一步之遥</li>-->
+<!--    </ul>-->
+
+    <!-- Single button -->
+<!--    <div class="btn-group">-->
+<!--        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">-->
+<!--            music    <span class="caret"></span>-->
+<!--        </button>-->
+<!--        <ul class="dropdown-menu">-->
+<!--            <li><a href="#">钢琴块之歌</a></li>-->
+<!--            <li><a href="#">卡农</a></li>-->
+<!--            <li><a href="#">青石巷</a></li>-->
+<!--            <li><a href="#">一步之遥</a></li>-->
+<!--            <li role="separator" class="divider"></li>-->
+<!--            <li><a href="#">Separated link</a></li>-->
+<!--        </ul>-->
+<!--    </div>-->
+
+
+    <canvas height="600" width="400" id="ctx1" >
+
+    </canvas >
+    <canvas height="200" width="400" id="ctx2">
+
+    </canvas>
+</div>
+</body>
+<script>
+    block={
+        obj:[],
+        width:null,
+        height:null,
+        speed:2,
+        speedup:0.8,
+        //a:65   s:83  d:68  f:70  j:74  k:75
+        keydic:{68:1,70:2,74:3,75:4},
+        init:function(){
+            this.width=game.width/(game.ylines-1);
+            this.height=game.height/(game.xlines-1);
+            for(var i=game.xlines-2;i>=0;i--){
+                // this.obj.push([Math.floor(Math.random()*(game.ylines-1)),i]);
+                //记录了黑块的右下角的位置，之所以选右下角是为了方便isCreate()函数
+                this.obj.push([Math.floor(Math.random()*(game.ylines-1)+1)*this.width,(i+1)*this.height]);
+
+            }
+        },
+
+        draw:function(){
+            ctx.fillStyle="black";
+            for(var i=0;i<this.obj.length;i++){
+                ctx.fillRect(this.obj[i][0]-this.width, this.obj[i][1]-this.height, this.width,this.height);
+            }
+        },
+        isCreate:function(){
+            //这里必须把this.boj.length===0放到"||"到前面，
+            // 因为"||"是从左到右运算的。如果放到"||"有便,则会因为obj为空而报错
+            if(this.obj.length===0||(this.obj[this.obj.length-1][1]>=this.height) ){ this.obj.push([Math.floor(Math.random()*(game.ylines-1)+1)*this.width,0]);}
+            //当最下面的黑块超出屏幕时
+            if(this.obj[0][1]-this.height>=game.height)
+                if(confirm("最终得分:"+info.score+"，点击确定或者按下空格再来一局")){location.reload();}
+        },
+        move:function(){
+            //此时队列里面只有3个元素
+            for(var i=0;i<this.obj.length;i++){
+                this.obj[i][1]+=this.speed;
+            }
+        },
+        judgemouse:function(a,b){
+
+            x=this.obj[0][0]-this.width/2;
+            y=this.obj[0][1]-this.height/2;
+            //未点中
+            if(!((Math.abs(x-a)<this.width/2)&&(Math.abs(y-b)<this.height/2))){
+                if(confirm("最终得分:"+info.score+"，点击确定或者按下空格再来一局")){location.reload();}
+            }
+            //被点击的黑块出队列
+            this.obj.shift();
+            //随机产生一个黑块的横坐标并加入队列
+            info.score++;
+            if(info.score%5===0) this.speed+=this.speedup;
+        },
+        judgekey:function(keycode){
+            //a:65   s:83  d:68  f:70   j:74  k:75
+            //点击错误
+            if(this.obj[0][0]/this.width===this.keydic[keycode]){
+                //被点击的黑块出队列
+                this.obj.shift();
+                //随机产生一个黑块的横坐标并加入队列
+                info.score++;
+                if(info.score%5===0) this.speed+=this.speedup;
+                return;
+            }
+            if(keycode===74||keycode===75||keycode===68||keycode===70){
+                if(confirm("最终得分:"+info.score+"，点击确定或者按下空格再来一局")){location.reload();}
+            }
+
+
+        },
+
+    };
+    info={
+        score:0,
+        level:1,
+        draw:function(){
+            ctx2.fillStyle = '#555';
+            ctx2.strokeStyle = '#2aabd2'; //  来用画字体边框;
+            ctx2.font = (game.height/20 ) + 'px Impact';
+            ctx2.textAlign = 'center';
+            ctx2.fillText("score:" + this.score,200 , 40);
+            ctx2.font = (game.height/30 ) + 'px Impact';
+            ctx2.fillText("游戏说明:玩家可用鼠标何键盘来操作游戏。", 200, 100);
+            ctx2.fillText("其中键'D,F'和'J,K'分别对应游戏的第一到四列。" , 200, 130);
+            ctx2.fillText("正确点击鼠标和键盘即可消除黑块." , 200, 160);
+
+        },
+    };
+    game={
+        height:600,
+        width:400,
+        time:20,
+        left:500,
+        top:20,
+        xlines:5,
+        ylines:5,
+        init:function(){
+
+        },
+        drawlines:function(){
+            // alert(block.width);
+            ctx.strokeStyle ="black";
+            ctx.lineWidth=0.5;
+            ctx.beginPath();
+            // ctx.moveTo(10,10);
+            // ctx.lineTo(400,10);
+
+            for(var i=1;i<this.ylines;i++){
+                ctx.moveTo(i*block.width,0);
+
+                // ctx.moveTo(i*block.width,0);
+                // ctx.lineTo(i*block.width,this.height);
+                ctx.lineTo(i*block.width,this.height);
+            }
+
+            for(var i=1;i<this.xlines;i++){
+                ctx.moveTo(0,i*block.height);
+                ctx.lineTo(this.width,i*block.height);
+            }
+            ctx.stroke();
+        },
+        run:function(){
+            block.init();
+            game.drawlines();
+            block.draw();
+            setInterval(function(){
+                ctx.clearRect(0,0,1000,1000);
+                ctx2.clearRect(0,0,1000,1000);
+                game.drawlines();
+                info.draw();
+                block.draw();
+                block.isCreate();
+                block.move();
+            },this.time)
+        },
+    };
+
+    document.onkeydown=function(event){
+        switch (event.keyCode) {
+            case 32:alert("已为您暂停游戏，单机确认或按下空格以继续");break;
+        }
+        //a:65   s:83  d:68  f:70
+        block.judgekey(event.keyCode);
+        event.returnValue = false;// 取消按键网页移动
+
+    };
+    function init(){
+        ctx=document.getElementsByTagName("canvas")[0].getContext("2d");
+        ctx2=document.getElementsByTagName("canvas")[1].getContext("2d");
+        // musics=document.getElementsByClassName("music");
+        // audio=document.getElementsByTagName("audio")[0];
+    }
+    {#$("#ctx1").click(function(event){#}
+    {#    event=event||window.event;#}
+    {#    //以后最好使用pageX 何pageY，因为它不会像clientX会受到网页移动的影响(不过二者都不会收到网页缩放的影响)#}
+    {#    a=event.pageX-game.left;#}
+    {#    b=event.pageY-game.top;#}
+    {#    //判断点击事件是否发生在ctx内部   现将这个函数与ctx1绑定，多以不需要这句代码了。#}
+    {#    // if(a<0||a>game.width||b<0||b>game.height ){return;}#}
+    {#    block.judgemouse(a,b);#}
+
+    document.onclick=function(event){
+        event=event||window.event;
+        //以后最好使用pageX 何pageY，因为它不会像clientX会受到网页移动的影响(不过二者都不会收到网页缩放的影响)
+        a=event.pageX-game.left;
+        b=event.pageY-game.top;
+        {#// if(a<0||a>game.width||b<0||b>game.height ){return;}#}
+        block.judgemouse(a,b);
+    };
+    init();
+    game.run();
+</script>
+</html>

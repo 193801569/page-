@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>别踩白块</title>
+    <style>
+        #box1{
+            background-color: #2aabd2;
+            margin: 0 auto;
+            height: 768px;
+            width: 1366px;
+        }
+        #ctx1{
+            background-color: #FFFFFF;
+            left:500px;
+            top:20px;
+            position:absolute;
+        }
+        #ctx2{
+            /*background-color: #4cae4c;*/
+            left:920px;
+            top:20px;
+            position:absolute;
+        }
+    </style>
+    <script src="../static/jQuery/jQuery-3.4.1.min.js"></script>
+
+
+</head>
+<body>
+<div id="box1" >
+    <canvas height="600" width="400" id="ctx1" >
+
+    </canvas >
+    <canvas height="100" width="200" id="ctx2">
+
+    </canvas>
+</div>
+</body>
+<script>
+    block={
+        obj:[],
+        width:null,
+        height:null,
+
+        init:function(){
+            this.width=game.width/(game.ylines-1);
+            this.height=game.height/(game.xlines-1);
+            for(var i=game.xlines-2;i>=0;i--){
+                this.obj.push([Math.floor(Math.random()*(game.ylines-1)),i]);
+            }
+        },
+
+        draw:function(){
+            ctx.fillStyle="black";
+            for(var i=0;i<this.obj.length;i++){
+                ctx.fillRect(this.obj[i][0]*this.width,
+                    this.obj[i][1]*this.height, this.width,this.height);
+            }
+        },
+        move:function(){
+            //此时队列里面只有3个元素
+            for(var i=0;i<this.obj.length;i++){
+                this.obj[i][1]++;
+            }
+        },
+        judge:function(a,b){
+            if(this.obj.length!==4){alert("obj.length!==4,有bug");}
+            //未点中
+            if(!((Math.abs(this.obj[0][0]*this.width+this.width/2-a)<this.width/2)&&
+                (Math.abs(this.obj[0][1]*this.height+this.height/2-b)<this.height/2))){
+                if(confirm("你玩游戏像菜虚坤，点击确定或者按下空格再来一局")){location.reload();}
+            }
+            //被点击的黑块出队列
+            this.obj.shift();
+            //随机产生一个黑快的横坐标并加入队列
+            this.move();
+            this.obj.push([Math.floor(Math.random()*(game.ylines-1)),0]);
+            info.score++;
+
+        }
+    };
+    info={
+        score:0,
+        draw:function(){
+            ctx.fillStyle = '#0f1';
+            ctx.strokeStyle = '#2aabd2'; //  来用画字体边框;
+            ctx.font = (game.height/20 ) + 'px Impact';
+            ctx.textAlign = 'center';
+            ctx.fillText("score:" + this.score,50 , 40);
+            // ctx.fillText("score:" + this.score, game.width - 90, 60);
+
+        },
+    };
+    game={
+        height:600,
+        width:400,
+        time:40,
+        left:500,
+        top:20,
+        xlines:5,
+        ylines:5,
+        init:function(){
+
+        },
+        drawlines:function(){
+            // alert(block.width);
+            ctx.strokeStyle ="black";
+            ctx.lineWidth=0.5;
+            ctx.beginPath();
+            // ctx.moveTo(10,10);
+            // ctx.lineTo(400,10);
+
+            for(var i=1;i<this.ylines;i++){
+                ctx.moveTo(i*block.width,0);
+
+                // ctx.moveTo(i*block.width,0);
+                // ctx.lineTo(i*block.width,this.height);
+                ctx.lineTo(i*block.width,this.height);
+            }
+
+            for(var i=1;i<this.xlines;i++){
+                ctx.moveTo(0,i*block.height);
+                ctx.lineTo(this.width,i*block.height);
+            }
+            ctx.stroke();
+        },
+        run:function(){
+            block.init();
+            game.drawlines();
+            block.draw();
+            setInterval(function(){
+                ctx.clearRect(0,0,1000,1000);
+                game.drawlines();
+                info.draw();
+                block.draw();
+
+            },this.time)
+        },
+    };
+    document.onclick=function(event){
+        event=event||window.event;
+        a=event.clientX-game.left;
+        b=event.clientY-game.top;
+        block.judge(a,b);
+    };
+    function init(){
+        ctx=document.getElementsByTagName("canvas")[0].getContext("2d");
+        ctx2=document.getElementsByTagName("canvas")[1].getContext("2d");
+    }
+    init();
+    game.run();
+</script>
+</html>

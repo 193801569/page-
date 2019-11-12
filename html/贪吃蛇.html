@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>贪吃蛇</title>
+    <link rel="stylesheet" type="text/css" href="../bootstrap/bootstrap/css/bootstrap.min.css">
+    <style>
+        .container {
+            background-color: #2aabd2;
+            margin: 0 auto;
+            height: 768px;
+            width: 1366px;
+            /*text-align: center;*/
+        }
+        #bnt1{
+            left:400px;
+            top: 20px;
+            position: relative;
+            /*height: 100px;*/
+            /*width:100%;*/
+        }
+        .button{
+            left:1250px;
+            top:20px;
+            position: absolute;
+        }
+        canvas {
+            position: absolute;
+            /*background-color: #4cae4c;*/
+            background-color: #ffffff;
+            margin: 0 auto;
+            top:10px;
+            left:35px;
+            /*padding: 60px ;*/
+            /*left: 300px;*/
+            /*text-align: center;*/
+        }
+
+    </style>
+    <script src="../static/jQuery/jQuery-3.4.1.min.js"></script>
+
+</head>
+<body>
+<div class="container"  >
+    <canvas height="600" width="1200" >
+    </canvas>
+    <div class="button" >
+        <p><button id="start" type="button" class="btn btn-primary">start</button></p>
+        <p><button id="pause"  type="button" class="btn btn-warning" width="30">pause</button></p>
+    </div>
+</div>
+</body>
+<script>
+    snake={
+        // head:null,
+        size:50,
+        x:null,
+        y:null,
+        tempx:null,
+        tempy:null,
+        speed:50,
+        tempSpeed:null,
+        //用来记录snake的状态，1表示运动,-1表示被空格暂停
+        flag:1,
+        direction:null,
+        //判断按键操作方向是否与移动方向相反
+        judgeDic:{
+            2:[38,87],
+            1:[40,83],
+            4:[37,65],
+            3:[39,68],
+        },
+        body:[],
+        init:function(){
+            //使x，y产生的范围分别为(200,800),和(250,450)
+            this.x=Math.random()*600+200;
+            this.y=Math.random()*200+250;
+            this.direction=Math.ceil(Math.random()*3+1);
+            this.head=new Image();
+            this.eating=new Image();
+            this.head.src ="../static/character/head.jpg";
+            this.eating.src ="../static/character/body.png";
+
+        },
+        draw:function(){
+            ctx.fillStyle="#0000ff";
+            // ctx.fillRect(this.x-this.size/2,this.y-this.size/2,this.size,this.size);
+            ctx.drawImage(this.head, this.x-this.size/2,this.y-this.size/2, this.size,this.size);
+            ctx.fillStyle="#00ffff";
+            if(this.body.length===0) return;
+            for(var i=0;i<this.body.length;i++){
+                // ctx.fillRect(this.body[i][0]-this.size/2,this.body[i][1]-this.size/2,this.size,this.size);
+                ctx.drawImage(this.eating,this.body[i][0]-this.size/2,this.body[i][1]-this.size/2,this.size,this.size)
+            }
+        },
+        move:function(){
+            snake.body.pop();
+            snake.body.unshift([this.x,this.y]);
+            switch (this.direction) {
+                //1,2,3,4分别代表上下左右
+                case 1:this.y-=this.speed;break;
+                case 2:this.y+=this.speed;break;
+                case 3:this.x-=this.speed;break;
+                case 4:this.x+=this.speed;break;
+            }
+        },
+        stop:function(){
+            if(confirm("已经为您暂停游戏，继续请点击确认或者空格")){location.reload();}
+        },
+        judge:function(){
+            if(!(this.x+game.left<0||this.x>game.width+game.left||this.y+game.top+20<0||this.y-50>game.height))
+            {return;}
+            if(confirm("你玩游戏像菜虚坤，是否要再来一局")){location.reload();}
+            for(var i=0;i<this.body.length;i++){
+              if((Math.abs(this.x-this.body[i][0])<this.size)&&Math.abs(this.y-this.body[i][1])<this.size) {
+                  if(confirm("你玩游戏像菜虚坤，是否要再来一局")){location.reload();}
+              }
+            }
+        },
+        grow:function(){
+            snake.body.unshift([this.x,this.y]);
+            snake.x=this.x;
+            snake.y=this.y;
+            info.score++;
+            if(info.score%5===0) {
+                info.level++;
+                snake.speed+=2;
+            }
+        }
+    };
+    info={
+        score:0,
+        level:1,
+        draw:function(){
+            ctx.fillStyle = '#0f1';
+            ctx.strokeStyle = '#2aabd2'; //  来用画字体边框;
+            ctx.font = (game.height/20 ) + 'px Impact';
+            ctx.textAlign = 'center';
+            ctx.fillText("score:" + this.score, game.width - 90, 60);
+            ctx.fillText("level:" + this.level, game.width - 200, 60);
+        },
+    };
+    food={
+        size:snake.size,
+        x:null,
+        y:null,
+        init:function(){
+            //使x，y产生的范围分别为(200,800),和(250,450)
+            this.x=Math.random()*600+200;
+            this.y=Math.random()*200+250;
+            this.hotdog=new Image();
+            this.hotdog.src="../static/character/hotdog.png";
+        },
+        draw:function(){
+            ctx.fillStyle="#444444";
+            // ctx.fillRect(this.x-this.size/2,this.y-this.size/2,this.size,this.size);
+            ctx.drawImage(this.hotdog,this.x-this.size/2,this.y-this.size/2,this.size,this.size);
+        },
+        isEat:function(){
+            if((Math.abs(this.x-snake.x)<this.size)&&(Math.abs(this.y-snake.y)<this.size)){
+                while((Math.abs(this.x-snake.x)<this.size)||(Math.abs(this.y-snake.y)<this.size)){
+                    this.init();
+                }
+                snake.grow();
+            }
+        },
+    };
+    game={
+        fps:300,
+        height:600,
+        width:1200,
+        top:10,
+        left:35,
+        init:function(){
+
+        },
+        run:function(){
+            this.init();
+            snake.init();
+            food.init();
+            // alert("x:"+snake.x+"y:"+snake.y);
+            setInterval(function(){
+                ctx.clearRect(0,0,1200,600);
+                info.draw();
+                food.draw();
+                snake.draw();
+                snake.move();
+                food.isEat();
+                snake.judge();
+
+            },game.fps)
+        },
+    };
+    //
+    function init(){
+        // can=document.getElementsByTagName("canvas")[0];
+        // ctx=can.getContext("2d");
+        ctx=$("canvas")[0].getContext("2d");
+        // ctx.css()
+        start=document.getElementById("start");
+        pause=document.getElementById("pause");
+    };
+
+
+    //主函数
+    pause.onclick=function(){
+        snake.stop();
+    };
+
+
+    document.onkeydown=function(event){
+        event=event||window.event;
+        //判断按键操作方向是否与移动方向相反
+        temp=snake.judgeDic[snake.direction];
+        if(temp[0]===event.keyCode||temp[1]===event.keyCode) return;
+        // alert()
+        switch (event.keyCode) {
+            case 38||87:snake.direction=1;this.y-=this.size;break;
+            case 40||83:snake.direction=2;this.y+=this.size;break;
+            case 37||65:snake.direction=3;this.x-=this.size;break;
+            case 39||68:snake.direction=4;this.x+=this.size;break;
+            case 32:{
+                snake.flag=-snake.flag;
+                if(snake.flag===1) snake.start();
+                else if(snake.flag===-1) snake.stop();
+                else alert("有bug");
+                break;
+            }//空格判断
+        }
+
+        event.returnValue = false;// 取消按键网页移动
+    };
+    start.onclick=function(){
+
+    };
+    init();
+    game.run();
+</script>
+</html>

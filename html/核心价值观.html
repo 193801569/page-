@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>点击效果</title>
+    <style>
+        #ctx1{
+            background-color: #2aabd2;
+            position:absolute;
+        }
+    </style>
+</head>
+<body>
+<canvas width="1366" height="768" id="ctx1">
+
+</canvas>
+</body>
+<script>
+    corevalue={
+        x:null,
+        y:null,
+        speed:3,
+
+        color:["#2aabd2","#4cae4c","#ffff00","#843534","#ab003c","#3E2E44","#0000FF",
+            "#000000","#2e6da4","#ffaabb","#f0ad4e","#ff0000"],
+        index:0,
+        size:1/50,
+        obj:[],
+        decoration:"❤❤",
+        words:["富强","民主","文明","和谐","自由","平等","公正","法治","爱国","敬业","诚信","友善"],
+        init:function(){
+
+        },
+        draw:function(){
+            ctx.strokeStyle = '#2aabd2'; //  来用画字体边框;
+            ctx.font = (main.height*this.size ) + 'px Impact';
+            ctx.textAlign = 'center';
+
+            for(var i=0;i<this.obj.length;i++){
+                ctx.fillStyle = this.color[(this.index+i)%12];
+                ctx.fillText(this.decoration + this.words[(this.index+i)%12]+this.decoration,
+                    this.obj[i][0] , this.obj[i][1]);
+            }
+        },
+        create:function(){
+            this.obj.push([this.x,this.y]);
+        },
+        move:function(){
+            for(var i=0;i<this.obj.length;i++){
+                this.obj[i][1]-=this.speed;
+            }
+        },
+        judge:function(){
+            if(this.obj.length===0){return;}
+            if(this.obj[0][1]<=0) {
+                this.obj.shift();
+                if(this.index>11){
+                    this.index=0;
+                }else{this.index++;}
+            }
+        },
+    };
+    main={
+        width:1366,
+        height:768,
+        time:20,
+        run:function(){
+            setInterval(function(){
+                ctx.clearRect(0,0,3000,3000);
+
+                // ctx.clearRect(0,0,this.width,this.height);
+                corevalue.init();
+                corevalue.draw();
+                corevalue.move();
+                corevalue.judge();
+            },this.time)
+        },
+    };
+    function init(){
+      ctx=document.getElementsByTagName("canvas")[0].getContext("2d");
+
+    };
+    document.onclick=function(event){
+        corevalue.x=event.clientX;
+        corevalue.y=event.clientY;
+        corevalue.create();
+    };
+    init();
+    main.run();
+</script>
+</html>

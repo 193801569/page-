@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>拼数字</title>
+    <style>
+        body{
+            background-color: #2aabd2;
+        }
+        #ctx{
+            background-color: #4cae4c;
+            left:400px;
+            position:absolute;
+        }
+
+    </style>
+    <script src="../static/jQuery/jQuery-3.4.1.js"></script>
+
+
+
+</head>
+<body>
+<canvas id="ctx" width="700" height="500">
+
+</canvas>
+
+</body>
+<script>
+    figure={
+        a:null,//用来记录白块的行和列
+        b:null,
+        size:null,//每块的宽度
+        width:500,
+        height:500,//整个碎片区的高度
+        num:null,//每行(列)的数量
+        fragment:[],
+        step:null,//打乱的步数
+        init:function(){
+            this.num=info.level+2;
+            this.a=this.b=this.num-1;
+            this.size=this.width/this.num;
+            this.step=Math.pow(this.num,3);
+            temp=[];
+            for(var i=0;i<this.num;i++){
+                for(var j=0;j<this.num;j++){
+                    temp.push(i*this.num+j);
+                }
+                this.fragment.push(temp);
+                temp=[];
+            }
+        },
+        mess:function(){
+            array=[1,2,3,4];
+            temp=null;
+            tempa=tempb=this.a;
+            //将交换空白块与随机块交换step此
+            for(var i=0;i<this.step;i++){
+                while(1){
+                    //随机产生1-4，分别表示上下左右
+                    random=Math.floor(Math.random()*array.length);
+                    switch (array[random]){
+                        case 1:tempa-=1;break;
+                        case 2:tempa+=1;break;
+                        case 3:tempb-=1;break;
+                        case 4:tempb+=1;break;
+                    }
+                    if((tempa>=0&&tempa<this.num)&&(tempb>=0&&tempb<this.num)){break;}
+                    array.splice(random,1);
+                    tempa=this.a;
+                    tempb=this.b;
+                }
+                //交换空白块与随机选中的块
+                this.swap(tempa,tempb);
+            }
+            // alert(this.a+","+this.b)
+        },
+        swap:function(tempa,tempb){
+            temp=this.fragment[this.a][this.b];
+            this.fragment[this.a][this.b]=this.fragment[tempa][tempb];
+            this.fragment[tempa][tempb]=temp;
+            this.a=tempa;
+            this.b=tempb;
+        },
+        draw:function(i,j){
+            //画棋盘
+            ctx.fillStyle="#fff";
+            ctx.fillRect(0,0,this.width,this.height);
+            for(var i=0;i<this.num+1;i++){
+                ctx.strokeStyle="#000";
+                ctx.lineWidth=0.1;
+                for(var j=0;j<this.num+1;j++){
+                    ctx.moveTo(0,i*this.size);
+                    ctx.lineTo(this.width,i*this.size);
+                    ctx.moveTo(i*this.size,0);
+                    ctx.lineTo(i*this.size,this.height);
+                }
+                ctx.stroke();
+                this.fragment.push(temp);
+            }
+            //画数字
+            ctx.fillStyle = '#4cae4c';
+            ctx.font = (this.size) + 'px Impact';
+            ctx.textAlign = 'center';
+            for(i=0;i<this.num;i++){
+                for(j=0;j<this.num;j++){
+                    console.log(this.fragment[i][j]);
+                    if(this.fragment[i][j]===Math.pow(this.num,2)-1){continue;}
+                    //0.5 and 0.9 没什么道理，为调节大小
+                    ctx.fillText( this.fragment[i][j], this.size*(j+0.5), this.size*(i+0.9));
+                    // ctx.fillText( this.fragment[i][j], this.size*(j), this.size*(i+1));
+                }
+                console.log("jfsd")
+            }
+        },
+        ismove:function(tempa,tempb){
+            if((tempa>=0&&tempa<this.num)&&(tempb>=0&&tempb<this.num)){
+                if(((Math.abs(this.a-tempa)===1)&&this.b===tempb)||
+                    (Math.abs(this.b-tempb)===1)&&this.a===tempa){
+                    // alert(tempa+","+tempb);
+                    this.swap(tempa,tempb);
+                    ctx.clearRect(0,0,figure.width,figure.height);
+                    this.draw();
+                    info.draw();
+
+                }
+            }
+            this.iswin();
+        },
+        iswin:function(){
+            for(var i=0;i<Math.pow(this.num,2)-1;i++){
+                // alert(i/this.num)
+                if(!(this.fragment[Math.floor(i/this.num)][Math.floor(i%this.num)]===i)){return;}
+            }
+            ctx.clearRect(0,0,figure.width,figure.height);
+            this.draw();
+            if(confirm("用时"+info.time+",是否想要进行下一关？")){
+                info.level+=1;
+                // location.reload();
+                ctx.clearRect(0,0,figure.width,figure.height);
+                return game.run();
+            }
+        },
+    };
+    info={
+        time:0,
+        level:3,
+        count:0,
+        width:null,
+        height:null,
+        init:function(){
+            // alert("before:"+this.level)
+            // this.level=window.level;
+            this.count=0;
+            // alert(this.level)
+        },
+        draw:function(){
+            this.time=this.count*game.time/1000;
+            ctx.fillStyle = '#001';
+            // ctx.fillStyle = '#0f1';
+            ctx.font = (this.width/10) + 'px Impact';
+            ctx.textAlign = 'center';
+            // alert(this.time)
+            // ctx.fillText( 11, this.width+game.left, 10);
+            ctx.fillText( this.time,950 , 20);
+        },
+    };
+    game={
+        time:30,
+        width:null,
+        height:null,
+        left:null,
+        init:function(){
+            this.width=parseInt($("#ctx").css("width"));
+            this.height=parseInt($("#ctx").css("height"));
+            this.left=parseInt($("#ctx").css("left"));
+        },
+        run:function(){
+            ctx.clearRect(0,0,figure.width,figure.height);
+            info.init();
+            game.init();
+            figure.init();
+            figure.mess();
+            figure.draw();
+            setInterval(function(){
+                // ctx.clearRect(0,0,figure.width,figure.height);
+                info.draw();
+                info.count++;
+            },game.time)
+        }
+    };
+    function init(){
+        ctx=document.getElementsByTagName("canvas")[0].getContext("2d");
+    }
+    $("#ctx").click(function(event){
+        tempa=Math.floor((event.pageY)/figure.size);
+        tempb=Math.floor((event.pageX-game.left)/figure.size);
+        // alert(tempa+","+tempb)
+        figure.ismove(tempa,tempb);
+    });
+    init();
+    game.run();
+
+</script>
+</html>

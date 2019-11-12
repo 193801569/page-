@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>弹球</title>
+    <style>
+        #box1 {
+            height: 800px;
+            background-color: #4cae4c;
+        }
+
+        canvas {
+            margin: 0 auto;
+            padding: 0px;
+            position: absolute;
+            top: 20px;
+            left: 170px;
+            background-color: #2aabd2;
+        }
+    </style>
+
+</head>
+<body>
+<div id="box1">
+    <canvas height="600" width="1000">
+    </canvas>
+</div>
+</body>
+
+<script>
+    // temp1=null;  //全局临时变量
+    // temp2=null;
+
+    function Ball() {
+        this.radius = 30;
+        this.speedx = 5;
+        this.speedy = this.speedx;
+        this.x = null;
+        this.y = null;
+        this.speedup=1;
+        this.init = function (Game) {
+            // alert(Game);
+            //此处必须传入一个Game对象，否则init()无法识别Game,所以this.x==this.y=NaN,
+            this.x = Game.width / 5 + Math.random() * Game.width * 3 / 5;
+            this.y = Game.height / 5 + Math.random() * Game.height * 3 / 5;
+            // this.speedx=(Math.random()*10>5)?this.x:(-this.speedx);  //随机化ball的初始方向
+            // this.speedy=(Math.random()>0.5)?this.y:(-this.speedy);
+            // this.x=300;
+            // this.y=300;
+        };
+        this.draw = function () {
+            ctx.beginPath();
+            ctx.fillStyle = "#843534";
+
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, true);
+            ctx.fill();
+        };
+        this.move = function () {
+            this.x += this.speedx;
+            this.y += this.speedy;
+        };
+        this.judge = function (Game, Block) {
+            // alert("ball:"+this);
+            // alert("Game.width:"+Game.width);
+            if (this.x <= this.radius || this.x >= (Game.width - this.radius)) {
+                this.speedx = -this.speedx;
+            }
+            if (this.y <= this.radius) {
+                this.speedy = -this.speedy;
+            } else if (this.y >= (Game.height - this.radius +2)) { //此处的三为调节值，使球恰好余底边相切时game over
+                if (Math.abs(Block.xb - this.x) < Block.wid / 2 + this.radius / 2) {
+                    this.speedy = -this.speedy;
+                    Game.score++;
+                    if(Game.score % 3===0){
+                        Game.level++;
+                        this.speedx=(this.speedx>0)?this.speedx+this.speedup:this.speedx-this.speedup;
+                        this.speedy=(this.speedy>0)?this.speedy+this.speedup:this.speedy-this.speedup;
+                    }
+                } else if (confirm("Game over! Try to again?")) {
+                    location.reload()
+                }
+            }
+
+        }
+    }
+
+    function Block() {
+        this.wid = 200;  //挡板的宽度和高度
+        this.hei = 3;
+        this.speedb = 20;
+        this.xb = null;
+        this.init = function (Game) { //这里必须将Game进来，init()否则无法识别Game
+            // alert("before:"+this.xb);
+            // alert(Game);
+            this.xb = Game.width / 2;
+            // alert("after:"+this.xb);
+        };
+        this.draw = function () {
+
+        }
+    }
+
+    function Game() {
+        this.fps = 20;
+        this.width = 1000;
+        this.height = 600;
+        this.ctx = null;
+        this.left=170;
+        this.level = 1;
+        this.score = 0;
+        this.flag=1;
+
+        this.init = function () {
+
+        };
+        this.drawInfo = function () {
+            ctx.fillStyle = '#0f1';
+            ctx.strokeStyle = '#2aabd2'; //  来用画字体边框;
+            ctx.font = (this.height / 20) + 'px Impact';
+            ctx.textAlign = 'center';
+            ctx.fillText("score:" + this.score, this.width - 90, 60);
+            ctx.fillText("level:" + this.level, this.width - 200, 60);
+        };
+        this.run = function (game) {
+            // this.init();
+
+            ball = new Ball();
+            block = new Block();
+            ball.init(this);
+            block.init(this);
+            // alert(block.xb);
+            ctx.fillRect(400, this.height - block.hei, 100, 10);
+            id=setInterval(function () {
+                ctx.clearRect(0, 0, 1000, 1000);
+                ball.draw();
+                game.drawInfo();
+                ball.move();
+                // alert(block.xb);
+                ctx.fillStyle = "red";
+                ctx.fillRect(block.xb - block.wid / 2, game.height - block.hei, block.wid, block.hei);
+                //这里一定要非常注意，如果直接传递this，judge()获取得则是一个window对象。
+                //所以我们可以传递实例化了得game对象。
+                ball.judge(game, block);
+                // block.judge(ball);
+                ctx.strokeRect(0, 0, 1000, 1000);
+            }, this.fps);
+        };
+    };
+
+    temp1=null;
+    temp2=null;
+    temp3=null;
+    temp4=null;
+
+    document.onmousemove=function(event){
+        event=event||window.event;
+        block.xb=event.clientX-game.left;
+    };
+    document.onkeydown = function (event) {
+        if((block.xb-block.wid/2)<=0||(block.xb+block.wid/2)>game.width) {
+            temp3=block.speedb;
+            block.speedb=0;
+            temp4=event.keyCode;
+        }else if(Math.abs(temp4-event.keyCode)===2) {block.speedb=temp3;}
+        if (event.keyCode === 37) { //方向键left
+            block.xb -= block.speedb;
+        } else if (event.keyCode === 39) { //方向键right
+            block.xb += block.speedb;
+        }else if(event.keyCode===32){
+            alert("已为您暂停游戏，按空格活点击确认以继续")
+        }
+        event.returnValue = false;// 取消空格上移网页
+
+    };
+    can = document.getElementsByTagName("canvas")[0];
+    ctx = can.getContext("2d");
+    game = new Game();
+    //传递实例化了得game对象，run()中得judge()使用game.width。
+    game.run(game);
+
+</script>
+</html>
+
+
+
+
+
+<!--    概述: 1 存在的bug:木板移动到最左边或者最右边后，无法再移动。-->
+
+<!--            为了用面向对象的方法写这个游戏，花费了大量的时间来调试程序的bug。-->
+<!--            不得不说javascript的面向对象机制设计的没有java好。以后要用面向对象的方法来写程序，-->
+<!--            着时一个很好的范例。-->
