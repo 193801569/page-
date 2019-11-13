@@ -28,16 +28,13 @@
 </body>
 
 <script>
-    // temp1=null;  //全局临时变量
-    // temp2=null;
-
     function Ball() {
         this.radius = 30;
         this.speedx = 5;
         this.speedy = this.speedx;
         this.x = null;
         this.y = null;
-        this.speedup=1;
+        this.speedup = 1;
         this.init = function (Game) {
             // alert(Game);
             //此处必须传入一个Game对象，否则init()无法识别Game,所以this.x==this.y=NaN,
@@ -45,8 +42,7 @@
             this.y = Game.height / 5 + Math.random() * Game.height * 3 / 5;
             // this.speedx=(Math.random()*10>5)?this.x:(-this.speedx);  //随机化ball的初始方向
             // this.speedy=(Math.random()>0.5)?this.y:(-this.speedy);
-            // this.x=300;
-            // this.y=300;
+
         };
         this.draw = function () {
             ctx.beginPath();
@@ -60,27 +56,25 @@
             this.y += this.speedy;
         };
         this.judge = function (Game, Block) {
-            // alert("ball:"+this);
-            // alert("Game.width:"+Game.width);
             if (this.x <= this.radius || this.x >= (Game.width - this.radius)) {
                 this.speedx = -this.speedx;
             }
             if (this.y <= this.radius) {
                 this.speedy = -this.speedy;
-            } else if (this.y >= (Game.height - this.radius +2)) { //此处的三为调节值，使球恰好余底边相切时game over
+            } else if (this.y >= (Game.height - this.radius + 2)) { //此处的三为调节值，使球恰好余底边相切时game over
                 if (Math.abs(Block.xb - this.x) < Block.wid / 2 + this.radius / 2) {
                     this.speedy = -this.speedy;
                     Game.score++;
-                    if(Game.score % 3===0){
+                    if (Game.score % 3 === 0) {
                         Game.level++;
-                        this.speedx=(this.speedx>0)?this.speedx+this.speedup:this.speedx-this.speedup;
-                        this.speedy=(this.speedy>0)?this.speedy+this.speedup:this.speedy-this.speedup;
+                        this.speedx = (this.speedx > 0) ? this.speedx + this.speedup : this.speedx - this.speedup;
+                        this.speedy = (this.speedy > 0) ? this.speedy + this.speedup : this.speedy - this.speedup;
                     }
-                } else if (confirm("Game over! Try to again?")) {
-                    location.reload()
+                } else {
+                    alert("游戏结束,最终得分" + game.score + "分,点击确定来退出游戏");
+                    window.close();
                 }
             }
-
         }
     }
 

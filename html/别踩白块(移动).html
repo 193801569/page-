@@ -24,41 +24,11 @@
             position:absolute;
         }
     </style>
+    <script src="../static/jQuery/jQuery-3.4.1.min.js"></script>
 
 </head>
 <body>
 <div id="box1" >
-<!--    <audio autoplay="autoplay" controls="controls"loop="loop" preload="auto"-->
-<!--           src="../static/musics/卡农.mp3">-->
-<!--        你的浏览器版本太低，不支持audio标签-->
-<!--    </audio>-->
-
-
-
-
-<!--    <ul class="music">-->
-<!--        <li>钢琴块之歌</li>-->
-<!--        <li>卡农</li>-->
-<!--        <li>青石巷</li>-->
-<!--        <li>一步之遥</li>-->
-<!--    </ul>-->
-
-    <!-- Single button -->
-<!--    <div class="btn-group">-->
-<!--        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">-->
-<!--            music    <span class="caret"></span>-->
-<!--        </button>-->
-<!--        <ul class="dropdown-menu">-->
-<!--            <li><a href="#">钢琴块之歌</a></li>-->
-<!--            <li><a href="#">卡农</a></li>-->
-<!--            <li><a href="#">青石巷</a></li>-->
-<!--            <li><a href="#">一步之遥</a></li>-->
-<!--            <li role="separator" class="divider"></li>-->
-<!--            <li><a href="#">Separated link</a></li>-->
-<!--        </ul>-->
-<!--    </div>-->
-
-
     <canvas height="600" width="400" id="ctx1" >
 
     </canvas >
@@ -113,7 +83,8 @@
             y=this.obj[0][1]-this.height/2;
             //未点中
             if(!((Math.abs(x-a)<this.width/2)&&(Math.abs(y-b)<this.height/2))){
-                if(confirm("最终得分:"+info.score+"，点击确定或者按下空格再来一局")){location.reload();}
+                alert("游戏结束,最终得分" + info.score + "分,点击确定来退出游戏");
+                window.close();
             }
             //被点击的黑块出队列
             this.obj.shift();
@@ -207,7 +178,8 @@
 
     document.onkeydown=function(event){
         switch (event.keyCode) {
-            case 32:alert("已为您暂停游戏，单机确认或按下空格以继续");break;
+            case 32:if(confirm("已为您暂停游戏,点击确定以继续,取消将会退出")){
+                }else{window.close();}break;
         }
         //a:65   s:83  d:68  f:70
         block.judgekey(event.keyCode);
@@ -220,21 +192,22 @@
         // musics=document.getElementsByClassName("music");
         // audio=document.getElementsByTagName("audio")[0];
     }
-    {#$("#ctx1").click(function(event){#}
-    {#    event=event||window.event;#}
-    {#    //以后最好使用pageX 何pageY，因为它不会像clientX会受到网页移动的影响(不过二者都不会收到网页缩放的影响)#}
-    {#    a=event.pageX-game.left;#}
-    {#    b=event.pageY-game.top;#}
-    {#    //判断点击事件是否发生在ctx内部   现将这个函数与ctx1绑定，多以不需要这句代码了。#}
-    {#    // if(a<0||a>game.width||b<0||b>game.height ){return;}#}
-    {#    block.judgemouse(a,b);#}
+    $("#ctx1").click(function(event) {
+        event = event || window.event;
+        //以后最好使用pageX 何pageY，因为它不会像clientX会受到网页移动的影响(不过二者都不会收到网页缩放的影响)#}
+        a = event.pageX - game.left;
+        b = event.pageY - game.top;
+        //判断点击事件是否发生在ctx内部   现将这个函数与ctx1绑定，多以不需要这句代码了。#}
+        // if(a<0||a>game.width||b<0||b>game.height ){return;}#}
+        block.judgemouse(a, b);
+    })
 
     document.onclick=function(event){
         event=event||window.event;
         //以后最好使用pageX 何pageY，因为它不会像clientX会受到网页移动的影响(不过二者都不会收到网页缩放的影响)
         a=event.pageX-game.left;
         b=event.pageY-game.top;
-        {#// if(a<0||a>game.width||b<0||b>game.height ){return;}#}
+        // {#// if(a<0||a>game.width||b<0||b>game.height ){return;}#}
         block.judgemouse(a,b);
     };
     init();

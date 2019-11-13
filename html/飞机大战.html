@@ -60,7 +60,8 @@
         },
         judge:function(){
             if(enemy.enemys[0][1]+enemy.height>game.height-10){
-                if(confirm("最终得分"+info.score+",是否再来一局")){location.reload();}
+                alert("游戏结束,最终得分" + info.score + "分,点击确定来退出游戏");
+                window.close();
             }
         },
 

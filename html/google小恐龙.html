@@ -118,7 +118,8 @@
             //被树撞死
             if(((Math.abs(this.x-background.trees[0][0])<this.width-15)&&(
                 (background.trees[0][1]-this.y<this.height-game.top-10)))){
-                if(confirm("最终得分"+info.score+",是否再来一局")){location.reload();}
+                alert("游戏结束,最终得分" + info.score + "分,点击确定来退出游戏");
+                window.close();
             }
         },
     };
@@ -201,7 +202,8 @@
     document.onkeydown=function(event){
         event=event||window.event;
         if (event.keyCode === 32) {
-            if(confirm("已为您暂停游戏,按下空格或者点击确定以继续,取消返回主界面(目前主界面还没做好)")){}
+            if(confirm("已为您暂停游戏,按下空格或者点击确定以继续,取消返回主界面")){
+            }else{window.close();}
         }else if(event.keyCode===38||event.keyCode===87) {
             long.img=long.img1;
             long.height=long.height1;
@@ -217,7 +219,7 @@
             long.y+=long.height1-long.height2+100;
             ctx.drawImage(long.img2,this.x,this.y,this.width2,this.height2);
         }
-        {#// event.returnValue = false;// 取消按键网页移动#}
+        event.returnValue = false;// 取消按键网页移动
     };
     init();
     game.run();

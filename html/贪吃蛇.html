@@ -13,18 +13,6 @@
             width: 1366px;
             /*text-align: center;*/
         }
-        #bnt1{
-            left:400px;
-            top: 20px;
-            position: relative;
-            /*height: 100px;*/
-            /*width:100%;*/
-        }
-        .button{
-            left:1250px;
-            top:20px;
-            position: absolute;
-        }
         canvas {
             position: absolute;
             /*background-color: #4cae4c;*/
@@ -33,8 +21,6 @@
             top:10px;
             left:35px;
             /*padding: 60px ;*/
-            /*left: 300px;*/
-            /*text-align: center;*/
         }
 
     </style>
@@ -45,10 +31,7 @@
 <div class="container"  >
     <canvas height="600" width="1200" >
     </canvas>
-    <div class="button" >
-        <p><button id="start" type="button" class="btn btn-primary">start</button></p>
-        <p><button id="pause"  type="button" class="btn btn-warning" width="30">pause</button></p>
-    </div>
+
 </div>
 </body>
 <script>
@@ -105,16 +88,16 @@
                 case 4:this.x+=this.speed;break;
             }
         },
-        stop:function(){
-            if(confirm("已经为您暂停游戏，继续请点击确认或者空格")){location.reload();}
-        },
+
         judge:function(){
             if(!(this.x+game.left<0||this.x>game.width+game.left||this.y+game.top+20<0||this.y-50>game.height))
             {return;}
-            if(confirm("你玩游戏像菜虚坤，是否要再来一局")){location.reload();}
+            alert("游戏结束,最终得分" + info.score + "分,点击确定来退出游戏");
+            window.close();
             for(var i=0;i<this.body.length;i++){
               if((Math.abs(this.x-this.body[i][0])<this.size)&&Math.abs(this.y-this.body[i][1])<this.size) {
-                  if(confirm("你玩游戏像菜虚坤，是否要再来一局")){location.reload();}
+                  alert("游戏结束,最终得分" + info.score + "分,点击确定来退出游戏");
+                  window.close();
               }
             }
         },
@@ -197,16 +180,9 @@
         // can=document.getElementsByTagName("canvas")[0];
         // ctx=can.getContext("2d");
         ctx=$("canvas")[0].getContext("2d");
-        // ctx.css()
-        start=document.getElementById("start");
-        pause=document.getElementById("pause");
+
     };
 
-
-    //主函数
-    pause.onclick=function(){
-        snake.stop();
-    };
 
 
     document.onkeydown=function(event){
@@ -221,19 +197,14 @@
             case 37||65:snake.direction=3;this.x-=this.size;break;
             case 39||68:snake.direction=4;this.x+=this.size;break;
             case 32:{
-                snake.flag=-snake.flag;
-                if(snake.flag===1) snake.start();
-                else if(snake.flag===-1) snake.stop();
-                else alert("有bug");
+                if(confirm("已为您暂停游戏,点击确定以继续,取消将会退出")){
+                }else{window.close();}
                 break;
             }//空格判断
         }
-
         event.returnValue = false;// 取消按键网页移动
     };
-    start.onclick=function(){
 
-    };
     init();
     game.run();
 </script>

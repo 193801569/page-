@@ -4,51 +4,31 @@
 <head>
     <meta charset="UTF-8">
     <title>王思聪接热狗</title>
-    <link rel="stylesheet" type="text/css" href="../bootstrap/bootstrap/css/bootstrap.min.css">
     <style>
         .container {
             background-color: #2aabd2;
             margin: 0 auto;
             height: 768px;
             width: 1366px;
-            /*text-align: center;*/
         }
-        #bnt1{
-            left:400px;
-            top: 20px;
-            position: relative;
-            /*height: 100px;*/
-            /*width:100%;*/
-        }
-        .button{
-            left:1250px;
-            top:20px;
-            position: absolute;
-        }
+
         canvas {
             position: absolute;
             background-color: #ffffff;
-            /*background-color: #4cae4c;*/
             margin: 0 auto;
             top:10px;
             left:35px;
             /*padding: 60px ;*/
-            /*left: 300px;*/
-            /*text-align: center;*/
+
         }
 
     </style>
-    <script src="../jQuery/jQuery-3.4.1.min.js"></script>
 
 </head>
 <body>
 <div class="container"  >
     <canvas height="600" width="1200" >
     </canvas>
-    <div class="button" >
-        <p><button id="start" type="button" class="btn btn-primary">start</button></p>
-        <p><button id="pause"  type="button" class="btn btn-warning" width="30">pause</button></p>
-    </div>
 </div>
 </body>
 <script>
@@ -128,9 +108,8 @@
                 if(info.score%5===0){info.level++;food.speed++;}
 
             }else if(this.y>=game.height-this.size/2){
-                if(confirm("你玩游戏像菜虚坤，点击确定或者按下空格再来一局")){
-                    location.reload();
-                }else{}
+                alert("游戏结束,最终得分" + info.score + "分,点击确定来退出游戏");
+                window.close();
             }
 
         },
@@ -169,12 +148,6 @@
     init();
     game.run();
 
-
-
-
-    start.onclick=function(){
-
-    };
 
     document.onkeydown=function(event){
         event=event||window.event;
